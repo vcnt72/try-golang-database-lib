@@ -1,13 +1,11 @@
-# Golang Web API Boilerplate
-The goals are to create agnostic boilerplate which
-you can experiment with every technology and concept that you want.
-The only things that have been decided are on the features list and can be easily replaced anything that you want
+# Try Golang Database Lib
+There is so many popular database lib in golang.
+This repo is being used to try the database lib that i'm interested in.
+The way of trying the database lib was to make a Todo list app.
+The main branch is only todo list app without database lib.
+The database lib experimentation are on the other branch.
 
-# Features
-- [x] Logger using Zap<br>
-- [x] GIN as REST API Library with graceful shutdown<br>
-- [x] Environment Variable are using VIPER<br>
-- [x] VSCode Debugger<br>
-- [ ] Testing utility<br>
-- [ ] CI/CD<br>
+# Database Lib Used
 
+- [ ] Ent
+- [ ] sqlx
