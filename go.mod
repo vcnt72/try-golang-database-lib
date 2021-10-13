@@ -1,4 +1,4 @@
-module github.com/vcnt72/golang-boilerplate
+module github.com/vcnt72/try-golang-database-lib
 
 go 1.16
 

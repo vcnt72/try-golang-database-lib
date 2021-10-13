@@ -11,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"github.com/vcnt72/golang-boilerplate/config"
+	"github.com/vcnt72/try-golang-database-lib/config"
 	"go.uber.org/zap"
 )
 
