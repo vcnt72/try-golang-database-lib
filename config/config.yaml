@@ -1,2 +1,4 @@
 server:
   port: 3000
+jwt:
+  secret: y*3+2QXBSz*RneYN
