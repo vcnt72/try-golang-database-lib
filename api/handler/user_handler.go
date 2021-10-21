@@ -60,7 +60,7 @@ func register(userService user.Usecase) gin.HandlerFunc {
 			return
 		}
 
-		userResp := presenter.User{
+		userResp := presenter.UserResponse{
 			ID:    userObj.ID,
 			Name:  userObj.Name,
 			Email: userObj.Email,
@@ -109,7 +109,7 @@ func login(userService user.Usecase) gin.HandlerFunc {
 			})
 		}
 
-		userResp := presenter.User{
+		userResp := presenter.UserResponse{
 			ID:    user.ID,
 			Email: user.Email,
 			Name:  user.Name,
@@ -124,5 +124,13 @@ func login(userService user.Usecase) gin.HandlerFunc {
 				"token": token,
 			},
 		})
+	}
+}
+
+func NewUserHandler(base *gin.RouterGroup, userService user.Usecase) {
+	userGroup := base.Group("users")
+	{
+		userGroup.POST("login", login(userService))
+		userGroup.POST("register", register(userService))
 	}
 }

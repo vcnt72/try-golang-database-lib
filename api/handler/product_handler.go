@@ -162,8 +162,76 @@ func getProductByID(productService product.Usecase) gin.HandlerFunc {
 }
 
 func paginateProduct(productService product.Usecase) gin.HandlerFunc {
-
 	return func(c *gin.Context) {
 
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+
+		defer cancel()
+
+		var paginateDTO request.PaginateProductRequest
+
+		if err := c.ShouldBindJSON(&paginateDTO); err != nil {
+
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Bad Request",
+			})
+
+			return
+		}
+
+		paginate := &entity.Paginate{
+			Page:    paginateDTO.Page,
+			PerPage: paginateDTO.PerPage,
+		}
+
+		products, err := productService.Paginate(ctx, product.FilterDTO{
+			ProductName: paginateDTO.ProductName,
+			UserID:      paginateDTO.UserID,
+			ProductIDs:  paginateDTO.ProductIDs,
+		}, paginate)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Unknown error",
+			})
+			return
+		}
+
+		var productResponses []presenter.ProductResponse
+
+		for _, v := range products {
+			productResponse := presenter.ProductResponse{
+				ID:       v.ID,
+				Name:     v.Name,
+				Price:    v.Price,
+				Quantity: v.Quantity,
+			}
+
+			productResponses = append(productResponses, productResponse)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Success",
+			"date": gin.H{
+				"products": productResponses,
+				"paginate": presenter.PaginatePresenter{
+					Page:    paginate.Page,
+					PerPage: paginate.PerPage,
+				},
+			},
+		})
+	}
+}
+
+func NewProductHandler(base *gin.RouterGroup, productService product.Usecase) {
+	productGroup := base.Group("products")
+	{
+		productGroup.POST("", createProduct(productService))
+		productGroup.GET("", paginateProduct(productService))
+		productGroup.GET(":productID", getProductByID(productService))
+		productGroup.PUT(":productID", updateProduct(productService))
 	}
 }
