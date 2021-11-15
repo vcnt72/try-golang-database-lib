@@ -10,15 +10,16 @@ import (
 )
 
 type service struct {
-	repo        Repository
-	userService user.Usecase
-	logger      zap.Logger
+	productRepository Repository
+	userService       user.Usecase
+	logger            *zap.Logger
 }
 
-func NewService(productRepository Repository, userService user.Usecase) Usecase {
+func NewService(productRepository Repository, userService user.Usecase, logger *zap.Logger) Usecase {
 	return &service{
-		repo:        productRepository,
-		userService: userService,
+		productRepository: productRepository,
+		userService:       userService,
+		logger:            logger,
 	}
 }
 func (s *service) Store(ctx context.Context, createDTO CreateProductDTO) (*entity.Product, error) {
@@ -29,7 +30,8 @@ func (s *service) Store(ctx context.Context, createDTO CreateProductDTO) (*entit
 		Price:    createDTO.Price,
 	}
 
-	product, err := s.repo.Store(ctx, product)
+	product, err := s.productRepository.Store(ctx, product)
+
 	if err != nil {
 		s.logger.Sugar().Error(err)
 		return nil, err
@@ -41,6 +43,10 @@ func (s *service) Store(ctx context.Context, createDTO CreateProductDTO) (*entit
 
 func (s *service) Update(ctx context.Context, updateDTO UpdateProductDTO) (*entity.Product, error) {
 	product, err := s.GetByID(ctx, updateDTO.ID)
+
+	if errors.Is(err, entity.ErrNotFound) {
+		return nil, err
+	}
 
 	if err != nil {
 		err = errors.Wrap(err, "error on get product by id")
@@ -57,14 +63,18 @@ func (s *service) Update(ctx context.Context, updateDTO UpdateProductDTO) (*enti
 
 func (s *service) Delete(ctx context.Context, id string) error {
 
-	product, err := s.GetByID(ctx, id)
+	product, err := s.productRepository.FindByID(ctx, id)
+
+	if errors.Is(err, entity.ErrNotFound) {
+		return err
+	}
 
 	if err != nil {
 		err = errors.Wrap(err, "error on get product by id")
 		s.logger.Sugar().Error(err)
 		return err
 	}
-	if err := s.repo.Delete(ctx, product); err != nil {
+	if err := s.productRepository.Delete(ctx, product); err != nil {
 		s.logger.Sugar().Error(err)
 		return err
 	}
@@ -73,7 +83,7 @@ func (s *service) Delete(ctx context.Context, id string) error {
 }
 
 func (s *service) GetByID(ctx context.Context, id string) (*entity.Product, error) {
-	product, err := s.repo.FindByID(ctx, id)
+	product, err := s.productRepository.FindByID(ctx, id)
 
 	if err != nil {
 		s.logger.Sugar().Error(err)
@@ -86,7 +96,7 @@ func (s *service) GetByID(ctx context.Context, id string) (*entity.Product, erro
 }
 
 func (s *service) Paginate(ctx context.Context, filterDTO FilterDTO, paginationOption *entity.Paginate) ([]entity.Product, error) {
-	products, err := s.repo.Paginate(ctx, filterDTO, paginationOption)
+	products, err := s.productRepository.Paginate(ctx, filterDTO, paginationOption)
 
 	if err != nil {
 		return nil, err

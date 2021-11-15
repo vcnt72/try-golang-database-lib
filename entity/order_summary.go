@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type OrderSummary struct {
 	ID              string
 	Total           float64
@@ -8,4 +10,5 @@ type OrderSummary struct {
 	OrderItems      []OrderItem
 	UserID          string
 	User            User
+	CreatedAt       *time.Time
 }

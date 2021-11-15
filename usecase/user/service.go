@@ -13,14 +13,14 @@ import (
 )
 
 type service struct {
-	repo   Repository
-	logger zap.Logger
+	userRepository Repository
+	logger         *zap.Logger
 }
 
-func NewService(repo Repository, logger zap.Logger) Usecase {
+func NewService(repo Repository, logger *zap.Logger) Usecase {
 	return &service{
-		repo:   repo,
-		logger: logger,
+		userRepository: repo,
+		logger:         logger,
 	}
 }
 
@@ -42,7 +42,7 @@ func (s *service) Register(ctx context.Context, createDTO CreateUserDTO) (*entit
 		Password: string(hashedPassword),
 	}
 
-	user, err = s.repo.Store(ctx, user)
+	user, err = s.userRepository.Store(ctx, user)
 
 	if err != nil {
 		err = errors.Wrap(err, "error on storing user to db")
@@ -55,7 +55,12 @@ func (s *service) Register(ctx context.Context, createDTO CreateUserDTO) (*entit
 }
 
 func (s *service) GetByID(ctx context.Context, id string) (*entity.User, error) {
-	user, err := s.repo.FindByID(ctx, id)
+	user, err := s.userRepository.FindByID(ctx, id)
+
+	if errors.Is(err, entity.ErrNotFound) {
+		return nil, err
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +69,11 @@ func (s *service) GetByID(ctx context.Context, id string) (*entity.User, error) 
 }
 
 func (s *service) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
-	user, err := s.repo.FindByEmail(ctx, email)
+	user, err := s.userRepository.FindByEmail(ctx, email)
+
+	if errors.Is(err, entity.ErrNotFound) {
+		return nil, err
+	}
 
 	if err != nil {
 
@@ -75,7 +84,11 @@ func (s *service) GetByEmail(ctx context.Context, email string) (*entity.User, e
 }
 
 func (s *service) Login(ctx context.Context, email, password string) (user *entity.User, tokenStr string, err error) {
-	user, err = s.GetByEmail(ctx, email)
+	user, err = s.userRepository.FindByEmail(ctx, email)
+
+	if errors.Is(err, entity.ErrNotFound) {
+		return nil, "", err
+	}
 
 	if err != nil {
 		return nil, "", err

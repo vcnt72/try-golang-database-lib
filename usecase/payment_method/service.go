@@ -2,18 +2,19 @@ package payment_method
 
 import (
 	"context"
+	"errors"
 
 	"github.com/vcnt72/try-golang-database-lib/entity"
 	"go.uber.org/zap"
 )
 
 type service struct {
-	repo   Repository
-	logger zap.Logger
+	paymentMethodRepository Repository
+	logger                  *zap.Logger
 }
 
 func (s *service) GetAll(ctx context.Context) ([]entity.PaymentMethod, error) {
-	paymentMethods, err := s.repo.FindAll(ctx)
+	paymentMethods, err := s.paymentMethodRepository.FindAll(ctx)
 
 	if err != nil {
 		s.logger.Sugar().Error(err.Error())
@@ -24,19 +25,25 @@ func (s *service) GetAll(ctx context.Context) ([]entity.PaymentMethod, error) {
 }
 
 func (s *service) GetByID(ctx context.Context, id string) (*entity.PaymentMethod, error) {
-	paymentMethod, err := s.repo.FindByID(ctx, id)
+	paymentMethod, err := s.paymentMethodRepository.FindByID(ctx, id)
+
+	if errors.Is(err, entity.ErrNotFound) {
+		return nil, err
+	}
 
 	if err != nil {
 		s.logger.Sugar().Error(err.Error())
 		return nil, err
 	}
+
 	s.logger.Sugar().Info("Success running paymentMethodService.GetByID")
 
 	return paymentMethod, nil
 }
 
-func NewService(paymentMethodRepository Repository) Usecase {
+func NewService(paymentMethodRepository Repository, logger *zap.Logger) Usecase {
 	return &service{
-		repo: paymentMethodRepository,
+		paymentMethodRepository: paymentMethodRepository,
+		logger:                  logger,
 	}
 }
