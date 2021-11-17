@@ -9,20 +9,20 @@ import (
 	"go.uber.org/zap"
 )
 
-type service struct {
+type Service struct {
 	productRepository Repository
 	userService       user.Usecase
 	logger            *zap.Logger
 }
 
 func NewService(productRepository Repository, userService user.Usecase, logger *zap.Logger) Usecase {
-	return &service{
+	return &Service{
 		productRepository: productRepository,
 		userService:       userService,
 		logger:            logger,
 	}
 }
-func (s *service) Store(ctx context.Context, createDTO CreateProductDTO) (*entity.Product, error) {
+func (s *Service) Store(ctx context.Context, createDTO CreateProductDTO) (*entity.Product, error) {
 
 	product := &entity.Product{
 		Name:     createDTO.Name,
@@ -41,7 +41,7 @@ func (s *service) Store(ctx context.Context, createDTO CreateProductDTO) (*entit
 
 }
 
-func (s *service) Update(ctx context.Context, updateDTO UpdateProductDTO) (*entity.Product, error) {
+func (s *Service) Update(ctx context.Context, updateDTO UpdateProductDTO) (*entity.Product, error) {
 	product, err := s.GetByID(ctx, updateDTO.ID)
 
 	if errors.Is(err, entity.ErrNotFound) {
@@ -61,7 +61,7 @@ func (s *service) Update(ctx context.Context, updateDTO UpdateProductDTO) (*enti
 	return product, nil
 }
 
-func (s *service) Delete(ctx context.Context, id string) error {
+func (s *Service) Delete(ctx context.Context, id string) error {
 
 	product, err := s.productRepository.FindByID(ctx, id)
 
@@ -82,7 +82,7 @@ func (s *service) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *service) GetByID(ctx context.Context, id string) (*entity.Product, error) {
+func (s *Service) GetByID(ctx context.Context, id string) (*entity.Product, error) {
 	product, err := s.productRepository.FindByID(ctx, id)
 
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *service) GetByID(ctx context.Context, id string) (*entity.Product, erro
 	return product, nil
 }
 
-func (s *service) Paginate(ctx context.Context, filterDTO FilterDTO, paginationOption *entity.Paginate) ([]entity.Product, error) {
+func (s *Service) Paginate(ctx context.Context, filterDTO FilterDTO, paginationOption *entity.Paginate) ([]entity.Product, error) {
 	products, err := s.productRepository.Paginate(ctx, filterDTO, paginationOption)
 
 	if err != nil {

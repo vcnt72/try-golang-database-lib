@@ -12,19 +12,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type service struct {
+type Service struct {
 	userRepository Repository
 	logger         *zap.Logger
 }
 
 func NewService(repo Repository, logger *zap.Logger) Usecase {
-	return &service{
+	return &Service{
 		userRepository: repo,
 		logger:         logger,
 	}
 }
 
-func (s *service) Register(ctx context.Context, createDTO CreateUserDTO) (*entity.User, error) {
+func (s *Service) Register(ctx context.Context, createDTO CreateUserDTO) (*entity.User, error) {
 
 	password := []byte(createDTO.Password)
 
@@ -54,7 +54,7 @@ func (s *service) Register(ctx context.Context, createDTO CreateUserDTO) (*entit
 	return user, nil
 }
 
-func (s *service) GetByID(ctx context.Context, id string) (*entity.User, error) {
+func (s *Service) GetByID(ctx context.Context, id string) (*entity.User, error) {
 	user, err := s.userRepository.FindByID(ctx, id)
 
 	if errors.Is(err, entity.ErrNotFound) {
@@ -68,7 +68,7 @@ func (s *service) GetByID(ctx context.Context, id string) (*entity.User, error) 
 	return user, nil
 }
 
-func (s *service) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+func (s *Service) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
 	user, err := s.userRepository.FindByEmail(ctx, email)
 
 	if errors.Is(err, entity.ErrNotFound) {
@@ -83,7 +83,7 @@ func (s *service) GetByEmail(ctx context.Context, email string) (*entity.User, e
 	return user, nil
 }
 
-func (s *service) Login(ctx context.Context, email, password string) (user *entity.User, tokenStr string, err error) {
+func (s *Service) Login(ctx context.Context, email, password string) (user *entity.User, tokenStr string, err error) {
 	user, err = s.userRepository.FindByEmail(ctx, email)
 
 	if errors.Is(err, entity.ErrNotFound) {

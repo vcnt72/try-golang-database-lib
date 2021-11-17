@@ -1,6 +1,7 @@
 package di
 
 import (
+	"github.com/vcnt72/try-golang-database-lib/api/handler"
 	"github.com/vcnt72/try-golang-database-lib/config"
 	"github.com/vcnt72/try-golang-database-lib/infrastructure/repository"
 	"github.com/vcnt72/try-golang-database-lib/usecase/order_summary"
@@ -8,7 +9,6 @@ import (
 	"github.com/vcnt72/try-golang-database-lib/usecase/product"
 	"github.com/vcnt72/try-golang-database-lib/usecase/user"
 	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
 )
 
@@ -29,12 +29,7 @@ func NewApp() *fx.App {
 		fx.Provide(zap.NewProduction),
 		diRepository,
 		diService,
-		fx.Invoke(NewGin),
-		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger {
-			return &fxevent.ZapLogger{
-				Logger: logger,
-			}
-		}),
+		fx.Invoke(handler.NewGin),
 	)
 
 	return app

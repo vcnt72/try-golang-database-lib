@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type service struct {
+type Service struct {
 	orderSummaryRepository  Repository
 	userRepository          user.Repository
 	productRepository       product.Repository
@@ -20,7 +20,7 @@ type service struct {
 }
 
 func NewService(orderSummaryRepository Repository, userRepository user.Repository, productRepository product.Repository, paymentMethodRepository payment_method.Repository, logger *zap.Logger) Usecase {
-	return &service{
+	return &Service{
 		orderSummaryRepository:  orderSummaryRepository,
 		userRepository:          userRepository,
 		productRepository:       productRepository,
@@ -28,7 +28,7 @@ func NewService(orderSummaryRepository Repository, userRepository user.Repositor
 		logger:                  logger,
 	}
 }
-func (s *service) Store(ctx context.Context, createDTO CreateOrderSummaryDTO) (*entity.OrderSummary, error) {
+func (s *Service) Store(ctx context.Context, createDTO CreateOrderSummaryDTO) (*entity.OrderSummary, error) {
 	paymentMethod, err := s.paymentMethodRepository.FindByID(ctx, createDTO.PaymentMethodID)
 
 	if err != nil {
@@ -62,7 +62,7 @@ func (s *service) Store(ctx context.Context, createDTO CreateOrderSummaryDTO) (*
 	return orderSummary, nil
 }
 
-func (s *service) genOrderItems(ctx context.Context, createDTO []CreateOrderItemDTO) ([]entity.OrderItem, error) {
+func (s *Service) genOrderItems(ctx context.Context, createDTO []CreateOrderItemDTO) ([]entity.OrderItem, error) {
 
 	var orderItems []entity.OrderItem
 
@@ -90,7 +90,7 @@ func (s *service) genOrderItems(ctx context.Context, createDTO []CreateOrderItem
 	return orderItems, nil
 }
 
-func (s *service) Search(ctx context.Context, filterDTO FilterDTO) ([]entity.OrderSummary, error) {
+func (s *Service) Search(ctx context.Context, filterDTO FilterDTO) ([]entity.OrderSummary, error) {
 	orderSummaries, err := s.orderSummaryRepository.Search(ctx, filterDTO)
 
 	if err != nil {
